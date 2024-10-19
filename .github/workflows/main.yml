@@ -2,7 +2,7 @@ name: Publish Helm Charts to ECR
 
 on:
   push:
-    branches: ['main', 'stage', 'dev']  # Define os branches que você deseja capturar
+    branches: ['main']
   workflow_dispatch:
 
 permissions:
@@ -13,6 +13,7 @@ jobs:
   push-helm-charts:
     runs-on: ubuntu-latest
     env:
+        IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
         URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
 
     steps:
@@ -32,7 +33,7 @@ jobs:
           run: |
             for app in $(ls -d */); do
                 if [ -f "$app/Chart.yaml" ]; then
-                    REPO_NAME="org-sam/${app%/}/${{ github.ref_name }}"  # Customiza o nome do repositório
+                    REPO_NAME=${app%/}
                     aws ecr describe-repositories --repository-names "$REPO_NAME" > /dev/null || \
                     aws ecr create-repository --repository-name "$REPO_NAME"
                 fi
@@ -43,7 +44,7 @@ jobs:
             for app in $(ls -d */); do
                 if [ -f "$app/Chart.yaml" ]; then
                     helm package $app --destination .
-                    REPO_NAME="org-sam/${app%/}/${{ github.ref_name }}"  # Usa o nome customizado do repositório
-                    helm push ${app%/}-*.tgz oci://${{ env.URI_ECR }}/$REPO_NAME
+                    helm push ${app%/}-*.tgz oci://${{ env.URI_ECR }}
                 fi
             done
+
