@@ -31,7 +31,7 @@ jobs:
             for app in $(ls -d */); do
             if [ -f "$app/Chart.yaml" ]; then
                 helm package $app --destination .
-                helm push ${app%/}-*.tgz oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/$app
+                helm push ${app%/}-*.tgz ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/$app
             fi
             done
 
