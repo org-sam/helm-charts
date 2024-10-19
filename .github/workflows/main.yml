@@ -41,7 +41,7 @@ jobs:
             aws ecr get-login-password \
             --region ${{ vars.AWS_REGION }} | helm registry login \
             --username AWS \
-            --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.region.amazonaws.com
+            --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
         
         # - name: Habilitar OCI para Helm
         #   run: |
