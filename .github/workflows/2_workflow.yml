@@ -44,3 +44,19 @@ jobs:
           publish_dir: ./packaged_charts
           publish_branch: gh-pages
           force_orphan: true
+  
+  pull-charts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add Helm Repository
+        run: |
+          helm repo add org-sam-charts https://org-sam.github.io/helm-charts/
+          helm repo update
+
+      - name: Install Helm Chart
+        run: |
+          echo "helm install my-release org-sam-charts/my-chart-name --namespace my-namespace"
