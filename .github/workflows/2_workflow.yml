@@ -10,25 +10,37 @@ permissions:
   contents: read
 
 jobs:
-  package-and-push-charts:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Package Helm Charts
-      run: |
-        mkdir -p charts
-        for dir in */; do
-          if [ -d "$dir" ]; then
-            helm package $dir --destination charts/
-          fi
-        done
+      - name: Set up Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-    - name: Push to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./charts
-        publish_branch: gh-pages  # Certifique-se de configurar o GitHub Pages com este branch
+      - name: Package Helm Charts
+        run: |
+          mkdir -p packaged_charts
+          for dir in */ ; do
+            if [ -f "${dir}Chart.yaml" ]; then
+              echo "Packaging chart in directory: $dir"
+              helm dependency update "$dir"
+              helm package "$dir" --destination packaged_charts
+            fi
+          done
+
+      - name: Update Helm Repository Index
+        run: |
+          helm repo index packaged_charts --url https://org-sam.github.io/helm-charts/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packaged_charts
+          publish_branch: gh-pages
+          force_orphan: true
