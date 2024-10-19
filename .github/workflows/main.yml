@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  push-helm-charts:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +26,12 @@ jobs:
         - name: Login to Amazon ECR
           uses: aws-actions/amazon-ecr-login@v2
 
-        - name: Package and push Helm charts for spring-demo
+        - name: Empacotar e Enviar Charts
           run: |
-            cd helm-charts/spring-demo
-            helm package .  # Cria o arquivo .tgz do chart
-            helm push spring-demo-*.tgz oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/helm-charts/spring-demo
+            for app in $(ls -d */); do
+            if [ -f "$app/Chart.yaml" ]; then
+                helm package $app --destination .
+                helm push ${app%/}-*.tgz oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/helm-charts/$app
+            fi
+            done
 
