@@ -12,6 +12,9 @@ permissions:
 jobs:
   push-helm-charts:
     runs-on: ubuntu-latest
+    env:
+        IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
+        URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
 
     steps:
         - name: Checkout code
@@ -36,23 +39,19 @@ jobs:
                 fi
             done
         
-        - name: Authenticate your Helm client to the Amazon ECR registry
-          run: |
-            aws ecr get-login-password \
-            --region ${{ vars.AWS_REGION }} | helm registry login \
-            --username AWS \
-            --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
-        
-        # - name: Habilitar OCI para Helm
+        # - name: Authenticate your Helm client to the Amazon ECR registry
         #   run: |
-        #     helm registry login -u AWS --password-stdin https://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com          
+        #     aws ecr get-login-password \
+        #     --region ${{ vars.AWS_REGION }} | helm registry login \
+        #     --username AWS \
+        #     --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com        
 
         - name: Empacotar e Enviar Charts
           run: |
             for app in $(ls -d */); do
                 if [ -f "$app/Chart.yaml" ]; then
                     helm package $app --destination .
-                    helm push ${app%/}-*.tgz oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/
+                    helm push ${app%/}-*.tgz oci://${{ env.URI_ECR }}
                 fi
             done
 
