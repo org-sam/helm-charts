@@ -1,8 +1,6 @@
 name: Publish and Install Helm Charts
 
 on:
-  push:
-    branches: ['main', 'dev', 'stage']
   workflow_dispatch:
     inputs:
       chart_name:
@@ -14,10 +12,12 @@ on:
         type: string
         description: 'Helm release name'
         required: false
+        default: "spring-demo"
       namespace:
         type: string
         description: 'Kubernetes namespace'
         required: false
+        default: "spring-demo"
 
 permissions:
   id-token: write
