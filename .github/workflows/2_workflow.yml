@@ -114,11 +114,11 @@ jobs:
           fi
 
           # Pull the chart and untar
-          helm pull org-sam-charts/"$CHART_NAME" --untar
+          echo helm pull org-sam-charts/"$CHART_NAME" --untar
 
           # Install the chart from local directory
           if [ -n "$VALUES_FILE" ]; then
-            helm install "$RELEASE_NAME" "$CHART_NAME" --namespace "$NAMESPACE" --values "$CHART_NAME/$VALUES_FILE"
+            echo helm install "$RELEASE_NAME" "$CHART_NAME" --namespace "$NAMESPACE" --values "$CHART_NAME/$VALUES_FILE"
           else
-            helm install "$RELEASE_NAME" "$CHART_NAME" --namespace "$NAMESPACE"
+            echo helm install "$RELEASE_NAME" "$CHART_NAME" --namespace "$NAMESPACE"
           fi
