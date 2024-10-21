@@ -28,20 +28,11 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Package and Push Helm Charts
-        env:
-          ECR_REGISTRY: ${{ env.URI_ECR }}/helm-charts
+      - name: Package and push Helm Charts
         run: |
-          # Faça login com helm para ECR
-          helm registry login -u AWS -p $(aws ecr get-login-password --region ${{ vars.AWS_REGION }}) $ECR_REGISTRY
-
-          # Iterar sobre cada diretório de chart
-          for chart in $(ls -d */ | cut -f1 -d'/'); do
-            echo "Packaging chart $chart"
-            helm package $chart --destination /tmp
-
-            CHART_PACKAGE=$(ls /tmp/${chart}-*.tgz | head -n1)
-
-            echo "Pushing chart $CHART_PACKAGE to ECR"
-            helm push $CHART_PACKAGE oci://$ECR_REGISTRY
+          for chart in $(ls -d */); do
+            CHART_NAME=$(basename $chart)
+            BRANCH=$(echo ${{ github.ref }} | awk -F'/' '{print $NF}')
+            helm package $chart
+            helm push $CHART_NAME-*.tgz oci://${{ env.URI_ECR }}/${{ env.ECR_REPO_PREFIX }}/$CHART_NAME/$BRANCH
           done
