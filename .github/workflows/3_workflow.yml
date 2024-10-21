@@ -33,7 +33,7 @@ jobs:
       - name: Package Helm charts
         run: |
           mkdir -p packaged-charts
-          for dir in charts/*/; do
+          for dir in $(ls -d */); do
             helm package "$dir" --destination ./packaged-charts
           done
 
