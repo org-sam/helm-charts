@@ -75,6 +75,10 @@ jobs:
 
       - name: Pull and Install Helm Chart
         run: |
+          pwd && echo
+          
+          ls -l
+
           # Determine the branch name
           BRANCH_NAME="${{ github.ref_name }}"
 
