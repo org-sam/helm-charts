@@ -3,18 +3,12 @@ name: Workflow 3
 on:
   push:
     branches:
-      - main
-      - master
-
-permissions:
-  id-token: write
-  contents: read
+      - main  # ou a branch que você desejar
 
 jobs:
-  publish:
+  build-and-push:
     runs-on: ubuntu-latest
     env:
-        IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
         URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
 
     steps:
@@ -30,15 +24,20 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Package Helm charts
+      - name: Package and Push Helm Charts
+        env:
+          ECR_REGISTRY: ${{ env.URI_ECR }}/helm-charts
         run: |
-          mkdir -p packaged-charts
-          for dir in $(ls -d */); do
-            helm package "$dir" --destination ./packaged-charts
-          done
+          # Faça login com helm para ECR
+          helm registry login -u AWS -p $(aws ecr get-login-password --region ${{ vars.AWS_REGION }}) $ECR_REGISTRY
 
-      - name: Push Helm charts to ECR
-        run: |
-          for chart in packaged-charts/*.tgz; do
-            helm push "$chart" oci://${{ env.URI_ECR }}/helm-charts
+          # Iterar sobre cada diretório de chart
+          for chart in $(ls -d */ | cut -f1 -d'/'); do
+            echo "Packaging chart $chart"
+            helm package $chart --destination /tmp
+
+            CHART_PACKAGE=$(ls /tmp/${chart}-*.tgz | head -n1)
+
+            echo "Pushing chart $CHART_PACKAGE to ECR"
+            helm push $CHART_PACKAGE oci://$ECR_REGISTRY
           done
