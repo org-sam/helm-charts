@@ -1,0 +1,19 @@
+apiVersion: v1
+entries:
+  app1-demo:
+  - apiVersion: v1
+    created: "2024-10-21T22:52:46.256074921Z"
+    digest: 8eb520fc60936871c77179d304dc082dfce6ab4e07142c47eda9103fffb6262b
+    name: app1-demo
+    urls:
+    - https://org-sam.github.io/helm-charts/app1-demo-1.0.1.tgz
+    version: 1.0.1
+  spring-demo:
+  - apiVersion: v1
+    created: "2024-10-21T22:52:46.256244146Z"
+    digest: 36792d0b642cf1073a3bb5776a108d84820e8da12bc82016dca8039a5fda983e
+    name: spring-demo
+    urls:
+    - https://org-sam.github.io/helm-charts/spring-demo-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-10-21T22:52:46.255806069Z"
