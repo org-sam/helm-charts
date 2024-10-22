@@ -28,11 +28,12 @@ jobs:
     needs: [push]
     runs-on: ubuntu-latest
     steps:
+      - name: MKDIR
+        run: mkdir arquivos-s3
       - name: Pull S3
-        run: |
-          mkdir arquivos-s3
-          aws s3 cp s3://platos-helm-charts/spring-demo arquivos-s3/spring-demo --recursive
-          ls -l ./arquivos-s3/spring-demo
+        run: aws s3 cp s3://platos-helm-charts/spring-demo ./arquivos-s3/spring-demo --recursive
+      - name: LS
+        run: ls -l ./arquivos-s3/spring-demo
       
       - name: create kind cluster
         run: kind create cluster --wait 30s
