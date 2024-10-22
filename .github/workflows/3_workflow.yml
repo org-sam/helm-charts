@@ -34,14 +34,10 @@ jobs:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
           aws-region: ${{ vars.AWS_REGION }}
       
+      - name: Pull S3
+        run: aws s3 cp s3://platos-helm-charts/spring-demo spring-demo --recursive
       - name: LS
         run: ls -l
-      - name: MKDIR
-        run: mkdir arquivos-s3
-      - name: Pull S3
-        run: aws s3 cp s3://platos-helm-charts/spring-demo ./arquivos-s3/spring-demo --recursive
-      - name: LS
-        run: ls -l ./arquivos-s3/spring-demo
       
       # - name: create kind cluster
       #   run: kind create cluster --wait 30s
