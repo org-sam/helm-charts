@@ -25,6 +25,7 @@ jobs:
         run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
 
   install:
+    needs: [push]
     runs-on: ubuntu-latest
     steps:
       - name: create kind cluster
