@@ -28,11 +28,26 @@ jobs:
     needs: [push]
     runs-on: ubuntu-latest
     steps:
+      - name: Pull S3
+        run: |
+          aws s3 cp s3://platos-helm-charts/spring-demo arquivos-s3/spring-demo --profile samuel --recursive
+          ls spring-demo
+      
       - name: create kind cluster
         run: kind create cluster --wait 30s
 
-      - name: Pull S3
+      - name: Install helm
         run: |
-          mkdir arquivos-s3
-          aws s3 cp s3://platos-helm-charts/* arquivos-s3
-          ls arquivos-s3
+          helm upgrade spring-demo ./arquivos-s3/spring-demo \
+            -f ./arquivos-s3/spring-demo/dev.yaml \
+            --atomic \
+            --install \
+            --debug \
+            --namespace spring-demo \
+            --set image="nginx" \
+            --set tagsDatadogVersion="v${{ github.run_id }}" \
+            --set ddGitCommitSHA="${{ github.sha }}" \
+            --set ddGitRepositoryURL="https://github.com/${{ github.repository }}" \
+            --timeout 10m
+
+      
