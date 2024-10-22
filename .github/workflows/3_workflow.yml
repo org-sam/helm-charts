@@ -30,6 +30,7 @@ jobs:
     steps:
       - name: Pull S3
         run: |
+          mkdir arquivos-s3
           aws s3 cp s3://platos-helm-charts/spring-demo arquivos-s3/spring-demo --recursive
           ls -l ./arquivos-s3/spring-demo
       
