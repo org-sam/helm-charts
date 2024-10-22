@@ -8,6 +8,29 @@ permissions:
   contents: read
 
 jobs:
+  lint-syntax:
+    name: Lint and Test Helm Charts
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Helm and Helm Unittest plugin
+      - name: Install Helm and Plugins
+        run: helm plugin install https://github.com/quintush/helm-unittest
+
+      # Helm Lint (syntax validation)
+      - name: Lint Helm charts
+        run: |
+          helm lint ./spring-demo
+      
+      # Run Helm Unittest (best practices validation)
+      - name: Run Helm Unittest
+        run: |
+          helm unittest ./spring-demo
+
   # push:
   #   runs-on: ubuntu-latest
 
@@ -24,36 +47,18 @@ jobs:
   #     - name: Sincroniza com S3
   #       run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
 
-  install:
-    # needs: [push]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
-          aws-region: ${{ vars.AWS_REGION }}
+  # install:
+  #   needs: [push]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
+  #         aws-region: ${{ vars.AWS_REGION }}
       
-      - name: Pull S3
-        run: aws s3 cp s3://platos-helm-charts/spring-demo spring-demo --recursive
-      - name: LS
-        run: ls -l
-      
-      # - name: create kind cluster
-      #   run: kind create cluster --wait 30s
-
-      # - name: Install helm
-      #   run: |
-      #     helm upgrade spring-demo ./arquivos-s3/spring-demo \
-      #       -f ./arquivos-s3/spring-demo/dev.yaml \
-      #       --atomic \
-      #       --install \
-      #       --debug \
-      #       --namespace spring-demo \
-      #       --set image="nginx" \
-      #       --set tagsDatadogVersion="v${{ github.run_id }}" \
-      #       --set ddGitCommitSHA="${{ github.sha }}" \
-      #       --set ddGitRepositoryURL="https://github.com/${{ github.repository }}" \
-      #       --timeout 10m
-
+  #     - name: Pull S3
+  #       run: aws s3 cp s3://platos-helm-charts/spring-demo spring-demo --recursive
+  #     - name: LS
+  #       run: ls -l
       
