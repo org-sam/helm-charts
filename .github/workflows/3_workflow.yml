@@ -22,7 +22,7 @@ jobs:
         run: |
           for app in $(ls -d */); do
             if [ -f "$app/Chart.yaml" ]; then
-                helm lint $app -f ./$app${{ github.ref_name }}.yaml --quiet   
+                helm lint $app -f ./$app/${{ github.ref_name }}.yaml --quiet   
             fi
           done
              
