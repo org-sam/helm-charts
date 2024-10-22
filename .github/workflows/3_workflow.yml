@@ -38,10 +38,10 @@ jobs:
         uses: aquasecurity/trivy-action@0.20.0
         with:
           scan-type: 'fs'
-          scan-ref: '.'
+          scan-ref: './spring-demo'
           format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
+          #severity: HIGH,CRITICAL
+          # ignore-unfixed: true
       
 
   # push:
