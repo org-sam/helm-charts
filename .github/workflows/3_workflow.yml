@@ -39,7 +39,9 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          trivy-config: trivy.yaml
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
       
 
   # push:
