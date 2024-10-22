@@ -24,30 +24,24 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
       
   
-      # 4. Pacotar os Helm charts
+      # 5. Pacotar os Helm charts
       - name: Pacotar Helm charts
         run: |
-          mkdir -p packaged-charts
+          mkdir packaged-charts
           for dir in */ ; do
             if [ -f "$dir/Chart.yaml" ]; then
               helm package "$dir" --destination packaged-charts
             fi
           done
 
-      # 5. Instalar e Usar o Plugin helm-s3 no Mesmo Step
-      - name: Inicializar e Atualizar Repositório Helm no S3
+      # 6. Inicializar o repositório Helm no S3 (somente na primeira execução)
+      - name: Inicializar Repositório Helm no S3
         run: |
-          # Instalar o plugin helm-s3
-          helm plugin install https://github.com/hypnoglow/helm-s3.git
-
-          # Verificar se o plugin foi instalado
-          helm plugin list
-
-          # Inicializar o repositório Helm no S3 (somente na primeira execução)
-          # Você pode comentar este comando após a primeira execução para evitar erros
           helm s3 init s3://platos-helm-charts
 
-          # Empurrar os charts para o S3
+      # 7. Atualizar o repositório Helm no S3 com os novos charts
+      - name: Atualizar Repositório Helm no S3
+        run: |
           for chart in packaged-charts/*.tgz; do
             helm s3 push "$chart" s3://platos-helm-charts
           done
