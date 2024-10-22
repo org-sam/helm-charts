@@ -24,5 +24,6 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Sincroniza com S3
-        run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*" --only-show-errors
+        run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*" | grep "upload:"
+
 
