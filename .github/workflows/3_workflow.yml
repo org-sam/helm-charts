@@ -1,7 +1,7 @@
 name: Workflow 3
 
 on:
-  workflow_dispatch:
+  push:
 
 permissions:
   id-token: write
@@ -24,4 +24,14 @@ jobs:
       - name: Sincroniza com S3
         run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
 
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create kind cluster
+        run: kind create cluster --wait 30s
 
+      - name: Pull S3
+        run: |
+          mkdir arquivos-s3
+          aws s3 cp s3://platos-helm-charts/* arquivos-s3
+          ls arquivos-s3
