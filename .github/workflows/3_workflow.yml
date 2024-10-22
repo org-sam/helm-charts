@@ -24,7 +24,7 @@ jobs:
       # Helm Lint (syntax validation)
       - name: Lint Helm charts
         run: |
-          helm lint ./spring-demo -f dev.yaml
+          helm lint ./spring-demo -f ./spring-demo/dev.yaml
       
       # Run Helm Unittest (best practices validation)
       - name: Run Helm Unittest
