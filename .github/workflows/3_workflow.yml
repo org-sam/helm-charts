@@ -11,67 +11,42 @@ jobs:
   lint-syntax:
     name: Lint and Test Helm Charts
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install Helm and Helm Unittest plugin
       - name: Install Helm and Plugins
         run: helm plugin install https://github.com/quintush/helm-unittest
 
-      # Helm Lint (syntax validation)
       - name: Lint Helm charts
         run: |
-          helm lint ./spring-demo -f ./spring-demo/dev.yaml --quiet
+          helm lint ./spring-demo -f ./spring-demo/dev.yaml --quiet      
 
-  security-scan:
-    name: Scan Helm Charts for Vulnerabilities
+  push:
     runs-on: ubuntu-latest
-
+    needs: [lint-syntax]
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner in fs mode
-        uses: aquasecurity/trivy-action@0.20.0
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          scan-type: 'fs'
-          scan-ref: './spring-demo'
-          format: table
-          #severity: HIGH,CRITICAL
-          # ignore-unfixed: true
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Sincroniza com S3
+        run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
+
+  install:
+    needs: [push]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
+          aws-region: ${{ vars.AWS_REGION }}
       
-
-  # push:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
-  #         aws-region: ${{ vars.AWS_REGION }}
-
-  #     - name: Sincroniza com S3
-  #       run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
-
-  # install:
-  #   needs: [push]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
-  #         aws-region: ${{ vars.AWS_REGION }}
-      
-  #     - name: Pull S3
-  #       run: aws s3 cp s3://platos-helm-charts/spring-demo spring-demo --recursive
-  #     - name: LS
-  #       run: ls -l
-      
+      - name: Pull S3
+        run: aws s3 cp s3://platos-helm-charts/spring-demo spring-demo --recursive
