@@ -24,12 +24,25 @@ jobs:
       # Helm Lint (syntax validation)
       - name: Lint Helm charts
         run: |
-          helm lint ./spring-demo -f ./spring-demo/dev.yaml
-      
-      # Run Helm Unittest (best practices validation)
-      - name: Run Helm Unittest
+          helm lint ./spring-demo -f ./spring-demo/dev.yaml --quiet
+
+  security-scan:
+    name: Scan Helm Charts for Vulnerabilities
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
         run: |
-          helm unittest ./spring-demo
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Scan Helm charts for vulnerabilities
+        run: |
+          trivy fs ./spring-demo
+      
 
   # push:
   #   runs-on: ubuntu-latest
