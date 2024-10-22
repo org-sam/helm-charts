@@ -24,4 +24,4 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Sincroniza com S3
-        run: aws s3 sync . s3://platos-helm-charts --delete
+        run: aws s3 sync . s3://platos-helm-charts --delete --exclude ".*"
